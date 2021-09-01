@@ -16,7 +16,7 @@ glimpse(CA_contributors_2016)
 
 # Highest Individual Contribution -----------------------------------------
 CA_contributors_2016 %>% 
-#  ?????????  %>% 
+  max(contb_receipt_amt)  %>% 
   View()
 
 # What was the average donation for a candidate, say Trump? ---------------
