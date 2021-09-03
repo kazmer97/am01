@@ -42,6 +42,7 @@ library(janitor)
 library(vroom)
 library(tidyquant)
 library(rvest) # to scrape wikipedia page
+library(skimr)
 ```
 
 
@@ -241,6 +242,7 @@ We must first identify which stocks we want to download data for, and for this w
 
 ```{r load_nyse_data, message=FALSE, warning=FALSE}
 nyse <- read_csv(here::here("data","nyse.csv"))
+glimpse(nyse)
 ```
 
 Based on this dataset, create a table and a bar plot that shows the number of companies per sector, in descending order
@@ -249,6 +251,15 @@ Based on this dataset, create a table and a bar plot that shows the number of co
 
 # YOUR CODE GOES HERE
 
+companiesPerSector <- nyse%>%
+  group_by(sector)%>%
+  count(sort = TRUE, name = "numOfComp")
+  
+
+ggplot(companiesPerSector, aes(x = numOfComp, y = reorder(sector,numOfComp)))+
+  geom_col()+
+  NULL
+  
 
 ```
 
@@ -307,6 +318,13 @@ Create a table where you summarise monthly returns for each of the stocks and `S
 
 # YOUR CODE GOES HERE
 
+monthlyReturnSummary <- myStocks_returns_monthly%>%
+  summarise(monthly_max = max(monthly_returns),
+            monthly_min = min(monthly_returns),
+            monthly_mean = mean(monthly_returns),
+            monthly_median = median(monthly_returns),
+            monthly_sd = sd(monthly_returns))
+
 ```
 
 
@@ -314,6 +332,9 @@ Plot a density plot, using `geom_density()`, for each of the stocks
 ```{r density_monthly_returns}
 
 # YOUR CODE GOES HERE
+ggplot(myStocks_returns_monthly, aes(monthly_returns))+
+  geom_density()+
+  facet_wrap(~symbol)
 
 ```
 
@@ -325,6 +346,11 @@ Finally, make a plot that shows the expected monthly return (mean) of a stock on
 
 ```{r risk_return_plot}
 # YOUR CODE GOES HERE
+library(ggrepel)
+ggplot(monthlyReturnSummary, aes(x = monthly_sd, y = monthly_mean))+
+  geom_point(size = 5, color = "blue")+
+  ggrepel::geom_text_repel(aes(label = symbol), size = 10)
+  
 
 ```
 
@@ -400,6 +426,20 @@ hr_cleaned <- hr_dataset %>%
 
 ```
 
+```{r}
+hr_numeric <- hr_dataset%>%
+  clean_names()%>%
+  select(age, attrition, daily_rate, department,
+         distance_from_home, education,
+         gender, job_role,environment_satisfaction,
+         job_satisfaction, marital_status,
+         monthly_income, num_companies_worked, percent_salary_hike,
+         performance_rating, total_working_years,
+         work_life_balance, years_at_company,
+         years_since_last_promotion)
+```
+
+
 Produce a one-page summary describing this dataset. Here is a non-exhaustive list of questions:
 
 1. How often do people leave the company (`attrition`)
@@ -410,6 +450,92 @@ Produce a one-page summary describing this dataset. Here is a non-exhaustive lis
 1. Calculate and plot a bar chart of the mean (or median?) income by education level.
 1. Plot the distribution of income by education level. Use a facet_wrap and a theme from `ggthemes`
 1. Plot income vs age, faceted by `job_role`
+
+```{r}
+# job satisfaction by department
+hr_numeric%>%
+  ggplot(aes(x=job_role, y = job_satisfaction))+
+  geom_boxplot()
+  
+```
+
+
+```{r}
+attrition_number <- count(hr_cleaned["attrition"]=="Yes")
+
+attrition_frequency <- attrition_number/nrow(hr_cleaned)
+```
+
+```{r}
+skimr::skim(hr_cleaned)
+
+```
+
+
+```{r}
+prop.table(table(hr_cleaned["job_satisfaction"]))
+
+prop.table(table(hr_cleaned["work_life_balance"]))
+
+
+```
+
+```{r}
+
+ggplot(hr_cleaned,aes(x = education, y = monthly_income))+
+  geom_boxplot()
+
+cor(hr_dataset["Education"],hr_dataset["MonthlyIncome"])
+```
+
+```{r}
+gender_income <- hr_dataset %>% 
+  mutate(binary_gender = case_when(Gender=="Male" ~0 ,
+                                   Gender == "Female" ~ 1))%>%
+  select(MonthlyIncome,binary_gender)
+
+cor(gender_income["binary_gender"],hr_dataset["MonthlyIncome"])
+
+ggplot(hr_dataset,aes(x = Gender, MonthlyIncome))+
+  geom_boxplot()
+```
+
+```{r}
+hr_cleaned %>% 
+  ggplot(aes(x=fct_reorder(job_role,-monthly_income),y=monthly_income))+
+  geom_boxplot()+
+  labs(title="Boxplot of Monthly Income Against Job Role", x="Job Role", y="Monthly Income")
+```
+```{r}
+mean_education <- hr_cleaned %>% 
+  group_by(education) %>% 
+  summarise(mean=mean(monthly_income))%>%
+  print(mean_education)
+
+ggplot(mean_education,aes(x=education,y=mean))+
+  geom_col()
+
+median_education <- hr_cleaned %>% 
+  group_by(education) %>% 
+  summarise(median=median(monthly_income))%>%
+  print(median_education)
+
+ggplot(median_education,aes(x=education,y=median))+
+  geom_col()
+```
+```{r}
+ggplot(hr_cleaned,aes(monthly_income))+
+  geom_histogram()+
+  facet_wrap(~education)+
+  theme_bw()
+```
+```{r}
+hr_cleaned %>% 
+  ggplot(aes(y=monthly_income,x=age))+
+  geom_point()+
+  facet_wrap(~job_role)
+
+```
 
 
 # Challenge 1: Replicating a chart
