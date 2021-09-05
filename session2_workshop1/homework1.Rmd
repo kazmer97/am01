@@ -60,19 +60,20 @@ data(drinks)
 What are the variable types? Any missing values we should worry about?
 
 ```{r glimpse_skim_data}
-# YOUR CODE GOES HERE
 skimr::skim(drinks)
 
 alcohol_data <- drinks
 
 ```
 
-The variable types are character and numeric. There are no missing values.
+> TEAM ANSWER:
+
+The variable types are character and numeric. There are no missing values. There are 4 numeric and 1 character type variable.
 
 Make a plot that shows the top 25 beer consuming countries
 
 ```{r beer_plot}
-# YOUR CODE GOES HERE
+
 top25_beer <- drinks %>%
   slice_max(., order_by = beer_servings, n = 25)
   
@@ -127,7 +128,7 @@ ggplot(top25_spirit, aes(y = reorder(country, spirit_servings), x = spirit_servi
 
 What can you infer from these plots? Don't just explain what's in the graph, but speculate or tell a short story (1-2 paragraphs max).
 
-> TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
+> TEAM ANSWER:
 
 The countries at the top of the list have high production of the given alcoholic beverage. Historic national connection to the given drink and national pride in its production seems to be an influencing factor in the choice of alcohol consumption. For example in Namibia the brewing industry is [regarded as a source of national pride](https://theconversation.com/beer-politics-and-identity-the-chequered-history-behind-namibian-brewing-success-155719).
 
@@ -158,11 +159,16 @@ Besides the obvious variables of `title`, `genre`, `director`, `year`, and `dura
 -   Produce a table with the average gross earning and budget (`gross` and `budget`) by genre. Calculate a variable `return_on_budget` which shows how many \$ did a movie make at the box office for each \$ of its budget. Ranked genres by this `return_on_budget` in descending order
 -   Produce a table that shows the top 15 directors who have created the highest gross revenue in the box office. Don't just show the total gross amount, but also the mean, median, and standard deviation per director.
 -   Finally, ratings. Produce a table that describes how ratings are distributed by genre. We don't want just the mean, but also, min, max, median, SD and some kind of a histogram or density graph that visually shows how ratings are distributed.
+
 ```{r}
-skimr::skim(movies)
-unique(movies)
+# skimr::skim(movies) # check summary of the dataset
+# unique(movies) # check number of uniques entries
 ```
-There are no missing values. There are no duplicat entries however the same titles appear multiple types which is indicative of movie remakes.
+
+> TEAM ANSWER TO: Are there any missing values (NAs)? Are all entries distinct or are there duplicate entries?
+
+There are no missing values. There are no duplicate entries however the same titles appear multiple types which is indicative of movie remakes.
+
 ```{r}
 
 # number of movies by genre in descending order
@@ -197,7 +203,7 @@ ratingByGenre <- movies%>%
             median_rating = median(rating))
 
 
-ggplot(movies, aes(y = rating, x = genre))+
+ggplot(movies, aes(y = rating, x = reorder(genre,-rating)))+
   geom_boxplot()+
   labs(x = "Genre",
        y = "Rating",
@@ -230,8 +236,10 @@ ggplot(movies, aes(x = cast_facebook_likes, y = gross))+
   sprintf("The correlation between cast facebook likes and gross is: %f",cor(movies$cast_facebook_likes, movies$gross))
 
 ```
-The relationship between `gross` and `cast_facebook_likes` is of positive has a 0.213 correlation which is not strong, meaning it is not the best predictor.
 
+> TEAM ANSWER:
+
+The relationship between `gross` and `cast_facebook_likes` is of positive has a 0.213 correlation which is not strong, meaning it is not the best predictor.
 
 -   Examine the relationship between `gross` and `budget`. Produce a scatterplot and write one sentence discussing whether budget is likely to be a good predictor of how much money a movie will make at the box office.
 
@@ -250,8 +258,10 @@ ggplot(movies, aes(x=budget, y = gross))+
 
 sprintf("Correlation between budget and gross: %f", s<-cor(movies$budget, movies$gross))
 ```
-The correlation between a movies budget and gross revenue at the box office has a stronger correlation than the facebook likes of the cast and the revenue, it is a better predictor of gross, but the correaltion is still below 0.7.
 
+> TEAM ANSWER: 
+
+The correlation between a movies budget and gross revenue at the box office has a stronger correlation than the facebook likes of the cast and the revenue, it is a better predictor of gross, but the correlation is still below 0.7.
 
 -   Examine the relationship between `gross` and `rating`. Produce a scatterplot, faceted by `genre` and discuss whether IMDB ratings are likely to be a good predictor of how much money a movie will make at the box office. Is there anything strange in this dataset?
 
@@ -269,8 +279,9 @@ ggplot(movies,aes(x = rating, y = gross))+
   NULL
 
 ```
-IMDB ratings are a weak predictor of a movies success at the box office as it can be seen for most cases the best fit line is almost horizontal. 
-The dataset is unbalanced in the sense that Action movies are over represented while Thriller, Musical, Romance, Western and Family barely have datapoints. Using it to learn about tendencies in genre would result in a incorrect statistical conclusions.
+>TEAM ANSWER:
+
+IMDB ratings are a weak predictor of a movies success at the box office as it can be seen for most cases the best fit line is almost horizontal. The dataset is unbalanced in the sense that Action movies are over represented while Thriller, Musical, Romance, Western and Family barely have datapoints. Using it to learn about tendencies in genre would result in a incorrect statistical conclusions. The dataset would result in biased machine learning learning models when it comes to predicting movie success. 
 
 # Returns of financial stocks
 
@@ -313,7 +324,7 @@ Next, let's choose some stocks and their ticker symbols and download some data. 
 # Notice the cache=TRUE argument inthe chunk options. Because getting data is time consuming, 
 # cache=TRUE means that once it downloads data, the chunk will not run again next time you knit your Rmd
 
-myStocks <- c("AAPL","JPM","DIS","DPZ","ANF","TSLA","XOM","SPY" ) %>%
+myStocks <- c("AAPL","DIS","DPZ","ANF","TSLA","SPY" ) %>%
   tq_get(get  = "stock.prices",
          from = "2011-01-01",
          to   = "2021-08-31") %>%
@@ -387,12 +398,9 @@ ggplot(myStocks_returns_monthly, aes(monthly_returns))+
 
 What can you infer from this plot? Which stock is the riskiest? The least risky?
 
-> TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
+> TEAM ANSWER:
 
-Tesla is the riskiest stock as it has the highest spread, which means its monthly standard deviations are the highest. 
-The least risky is SPY as it has the narrowest spread.
-
-
+Tesla is the riskiest stock as it has the highest spread, which means its monthly standard deviations are the highest. The least risky is SPY as it has the narrowest spread.
 
 Finally, make a plot that shows the expected monthly return (mean) of a stock on the Y axis and the risk (standard deviation) in the X-axis. Please use `ggrepel::geom_text_repel()` to label each stock
 
@@ -400,7 +408,7 @@ Finally, make a plot that shows the expected monthly return (mean) of a stock on
 # YOUR CODE GOES HERE
 library(ggrepel)
 ggplot(monthlyReturnSummary, aes(x = monthly_sd, y = monthly_mean))+
-  geom_point(size = 4)+
+  geom_point(size = 4, aes(color = symbol))+
   ggrepel::geom_text_repel(aes(label = symbol), size = 4)+
   labs(x = "Standard Deviation of Monthly Returns",
        y = "Average Monthly Returns",
@@ -413,10 +421,9 @@ ggplot(monthlyReturnSummary, aes(x = monthly_sd, y = monthly_mean))+
 
 What can you infer from this plot? Are there any stocks which, while being riskier, do not have a higher expected return?
 
-> TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
+> TEAM ANSWER:
 
-ANF is much riskier than most, while delivering the second lowest returns. 
-
+ANF is much riskier than most, while delivering the lowest returns.
 
 # On your own: IBM HR Analytics
 
@@ -509,9 +516,16 @@ Produce a one-page summary describing this dataset. Here is a non-exhaustive lis
 # job satisfaction by department
 hr_numeric%>%
   ggplot(aes(x=job_role, y = job_satisfaction))+
-  geom_boxplot()
+  geom_boxplot()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.8))+
+  labs(title = "Distribution of Job Satisfaction by Job Title",
+       x = "Job Title",
+       y = "Job Satisfaction")+
+  NULL
   
 ```
+The job satisfaction of Human Resource employees is significantly lower than every other department where the job satisfaction is consistent. 
 
 ```{r}
 attrition_number <- count(hr_cleaned["attrition"]=="Yes")
@@ -519,26 +533,100 @@ attrition_number <- count(hr_cleaned["attrition"]=="Yes")
 attrition_frequency <- attrition_number/nrow(hr_cleaned)
 ```
 
+After looking at the attrition frequency we can see that on average employees leave the company 16% of the time.
+
 ```{r}
 skimr::skim(hr_cleaned)
 
 ```
 
+By looking at the summary statistics provided in the data summary, the **'age'** variable seems to be normally distributed as the interval between the mean, median, max and quartiles are the most even. 
+
+**'years_at_company'** variable has a  right skewed pattern since the percentiles are not evenly distributed. 25th percentile is 0 meanwhile the median (p50) is 1, the 75th percentile is 3 but then the 100th percentile jumps to 15. 
+
+**'monthly_income'** is  right skewed, the minimum is 0 and the max is 19999. The median (p50) is 4919. Which means there are either unpaid interns or there are mistakes in the dataset. 
+
+The **'years_since_last_promotion'** variable, the 75th percentile (p75) is 3 meaning that 75 percent of the data is 3 or less but then the 100 percentile is 15 which tells us that the data is very right skewed. 
+
 ```{r}
-prop.table(table(hr_cleaned["job_satisfaction"]))
 
-prop.table(table(hr_cleaned["work_life_balance"]))
 
+library(scales)
+library(ggrepel)
+library(forcats)
+
+
+
+# hr_cleaned$job_satisfaction <- factor(hr_cleaned$job_satisfaction,levels=c("Low","Medium","High","Very High"))
+
+hr_cleaned %>% 
+  group_by(job_satisfaction) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent = percent(count/sum(count)),
+         job_satisfaction_n = case_when(
+            job_satisfaction == "Low" ~1,
+            job_satisfaction == "Medium"~2,
+            job_satisfaction == "High"~3,
+            job_satisfaction == "Very High"~4
+         )) %>% 
+  ggplot(aes(x=fct_reorder(job_satisfaction,job_satisfaction_n),y=percent))+
+  geom_col()+
+  geom_text_repel(aes(label=percent))+
+  labs(title="Job Satisfaction",
+       x="Job Satisfaction",
+       y = "% of employees")+
+  theme_bw()+
+  NULL
+
+# hr_cleaned$work_life_balance <- factor(hr_cleaned$work_life_balance,levels=c("Bad","Good", "Better","Best"))
+
+hr_cleaned %>% 
+  group_by(work_life_balance) %>% 
+  summarise(count=n()) %>% 
+  mutate(percent = percent(count/sum(count)),
+         work_life_balance_n = case_when(
+          work_life_balance == "Bad" ~1,
+          work_life_balance ==  "Good" ~2,
+          work_life_balance ==   "Better" ~3,
+          work_life_balance ==   "Best"~4
+         )) %>% 
+  ggplot(aes(x=fct_reorder(work_life_balance,work_life_balance_n),y=percent))+
+  geom_col()+
+  geom_text_repel(aes(label=percent))+
+  labs(title="Work Life Balance",
+       x="Work Life Balance",
+       y = "% of employees")+
+  theme_bw()+
+  NULL
 
 ```
 
+**"job_satisfaction":** 61% people of the employees are very satisfied with their job, whereas around 19% of people are okay with their jobs. The remaining 20% are have low satisfaction ratings. Job satisfaction seems to be left skewed. 
+
+**"work_life_balance":** This variable is a bit more normally distributed than job_satisfaction, although it is still left skewed. 10% of the people have a very good work life balance while 5% people are not happy with their work life balance. 60% of employees  report a pretty good score and the remaining 23% seems to be doing okay. 
+
+
 ```{r}
 
+hr_cleaned$education <- factor(hr_cleaned$education,levels=c("Below College","College","Bachelor","Master","Doctor"))
+
 ggplot(hr_cleaned,aes(x = education, y = monthly_income))+
-  geom_boxplot()
+  geom_boxplot() +
+   labs(x = "Education Level",
+       y = "Monthly Income ",
+       title  = "Boxplot of Monthly Income by Education Level")+
+  theme_bw()+
+  NULL
 
 cor(hr_dataset["Education"],hr_dataset["MonthlyIncome"])
 ```
+
+**Relationship between monthly income and education: ** 
+
+r-value:0.09496068
+
+After looking at the box plot and our r-value, it can be seen that monthly income and education level has slight positive correlation. The more educated you are, the more income you earn. But because the r-value is still very close to zero, we would avoid saying they are highly correlated. 
+Even though the r value is low, looking at the box plots it is obvious that education level can contribute to monthly income. 
 
 ```{r}
 gender_income <- hr_dataset %>% 
@@ -549,14 +637,26 @@ gender_income <- hr_dataset %>%
 cor(gender_income["binary_gender"],hr_dataset["MonthlyIncome"])
 
 ggplot(hr_dataset,aes(x = Gender, MonthlyIncome))+
-  geom_boxplot()
+  geom_boxplot() +
+  labs(x = "Gender",
+       y = "Monthly Income ",
+       title  = "Boxplot of Monthly Income by Gender")+
+  theme_bw()+
+  NULL
+
 ```
+**Relationship between monthly income and gender: ** 
+
+r-value: 0.03185849.
+The r-value is positive towards women with a value of 0.03185849. But this is close enough to zero. Looking at the box plot of monthly income by gender, we can see that females make a little bit more but it is almost negligible. 
 
 ```{r}
 hr_cleaned %>% 
   ggplot(aes(x=fct_reorder(job_role,-monthly_income),y=monthly_income))+
   geom_boxplot()+
-  labs(title="Boxplot of Monthly Income Against Job Role", x="Job Role", y="Monthly Income")
+  labs(title="Boxplot of Monthly Income Against Job Role", x="Job Role", y="Monthly Income")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.8))+
+  NULL
 ```
 
 ```{r}
@@ -566,7 +666,12 @@ mean_education <- hr_cleaned %>%
   print(mean_education)
 
 ggplot(mean_education,aes(x=education,y=mean))+
-  geom_col()
+  geom_col()+
+  labs(title = "Education vs Mean Monthly Income",
+       x = "Education Level",
+       y = "Mean Monthly Income ($)")+
+  theme_bw()+
+  NULL
 
 median_education <- hr_cleaned %>% 
   group_by(education) %>% 
@@ -574,21 +679,31 @@ median_education <- hr_cleaned %>%
   print(median_education)
 
 ggplot(median_education,aes(x=education,y=median))+
-  geom_col()
+  geom_col()+
+  labs(title = "Education vs Median Monthly Income",
+       x = "Education Level",
+       y = "Median Monthly Income ($)")+
+  theme_bw()+
+  NULL
 ```
 
 ```{r}
 ggplot(hr_cleaned,aes(monthly_income))+
   geom_histogram()+
   facet_wrap(~education)+
-  theme_bw()
+  labs( x = "Monthly Income", y = "Count",
+        title = "Histograms of Monthly Income by Education Level")+
+  theme_bw()+
+  NULL
 ```
 
 ```{r}
 hr_cleaned %>% 
   ggplot(aes(y=monthly_income,x=age))+
   geom_point()+
-  facet_wrap(~job_role)
+  facet_wrap(~job_role)+
+  labs(x="Age", y="Monthly Income",
+       title= "Scatter Plots of Age vs Income by Job Role")
 
 ```
 
@@ -669,8 +784,6 @@ trump_votes <- election2020_results%>%
   filter(candidate == "DONALD J TRUMP")%>%
   filter(mode == "TOTAL")%>%
   group_by(fips)%>%
-  summarise(candidatevotes = sum(candidatevotes),
-            totalvotes = sum(totalvotes))%>%
   mutate(prcOfVote = (candidatevotes/totalvotes)*100)
 
 head(trump_votes)
@@ -685,24 +798,44 @@ vax_complete_pop_pct <- left_join(x = vax_complete_pop_pct, y = trump_votes, by=
 library(Hmisc)
 
 ggplot(vax_complete_pop_pct, aes(x = prcOfVote, y = series_complete_pop_pct))+
-  geom_point(alpha = 0.2, color = "grey", aes(size = pop))+
+  geom_point(alpha = 0.2, color = "snow4", aes(size = pop))+
+  annotate("rect", xmin = 45, xmax = Inf, ymin = -Inf, ymax = Inf, fill = "indianred1", alpha = 0.3)+
+  annotate("rect", xmin = 0, xmax = 55, ymin = -Inf, ymax = Inf, fill = "royalblue1", alpha = 0.3)+
+  annotate("line", x = seq(0,100), y = 85, lty = 2, color = "blue")+
+  annotate("text", x = 17, y = 87, label = "Herd Immunity threshold (?)", size = 2, fontface = 4, color = "blue")+
+  annotate("text", x = 15, y = 15, label = "y = -0.4956x + 0.73669\nR\u00B2 = 0.501", size = 2, color= "red", hjust = "centre", fontface = "bold")+
+  annotate("line", x = seq(0,100), y = 51.65, lty = 2,color = "blue")+
+  annotate("text", x = 10, y = 54, label =  sprintf("ACTUAL: %0.2f %%",51.65), size =2, fontface = "bold", color = "blue")+
+  annotate("line", x = seq(0,100), y = 70, lty = 2,color = "blue")+
+  annotate("text", x = 10, y = 72, label =  sprintf("TARGET: %0.2f %%",70), size =2, fontface = "bold", color = "blue")+
+  annotate("text", x = 40, y = 15, label = "5/09/2021", color = "red", fontface = "bold", size = 2)+
   scale_size(range = c(.1, 15), name = "Population (M)")+
   geom_point(size= 0.1)+
   geom_smooth(method = "lm", 
               se = FALSE, 
-              lty=2, 
+              lty=5, 
               color = "blue", 
-              lwd = 0.3)+
+              lwd = 0.5)+
   ylab("% of Total Population Vaccinated")+
   xlab("2020 Trump vote %")+
-  labs(title = "Covid-19 Vaccination levels out of total population by county")+
+  labs(title = "COVID-19 VACCINATION LEVELS \nOUT OF TOTAL POPULATION BY COUNTY")+
   theme_light()+
-  scale_y_continuous(labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=11))+
-  scale_x_continuous(labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=11))+
-  theme(aspect.ratio = 20/18, panel.background = element_rect(fill = 'lightblue', aes()))
+  scale_y_continuous(expand = c(0,0), labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=20), limits = c(0,100))+
+  scale_x_continuous(expand = c(0,0), labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=20), limits = c(0,100))+
+  theme(aspect.ratio = 20/18,
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title = element_text(size = 10),
+        plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
   
   
 
+```
+
+```{r}
+print(summary(lm(vax_complete_pop_pct,formula = series_complete_pop_pct ~ prcOfVote)))
+
+sprintf("Percentage of the total population vaccinated: %0.2f ",sum(vax_complete_pop_pct$series_complete_pop_pct*vax_complete_pop_pct$pop)/sum(vax_complete_pop_pct$pop))
 ```
 
 # Challenge 2: Opinion polls for the 2021 German elections
@@ -775,8 +908,6 @@ german_graph <- ggplot(german_election_polls, aes(x=end_date)) +
 ggplotly(german_graph + ylim(5, 45))
 
 ```
-
-
 
 # Deliverables
 
