@@ -1,6 +1,6 @@
 ---
 title: "Session 2: Homework 1"
-author: "Kazmer Nagy-Betegh"
+author: "Team 11"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -41,6 +41,7 @@ library(vroom)
 library(tidyquant)
 library(rvest) # to scrape wikipedia page
 library(skimr)
+library(ggplot2)
 ```
 
 # Where Do People Drink The Most Beer, Wine And Spirits?
@@ -136,7 +137,7 @@ The countries at the top of the list have high production of the given alcoholic
 
 We will look at a subset sample of movies, taken from the [Kaggle IMDB 5000 movie dataset](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)
 
-```{r,load_movies, warning=FALSE, message=FALSE, eval=FALSE}
+```{r,load_movies, warning=FALSE, message=FALSE}
 
 movies <- read_csv(here::here("data", "movies.csv"))
 glimpse(movies)
@@ -161,8 +162,8 @@ Besides the obvious variables of `title`, `genre`, `director`, `year`, and `dura
 -   Finally, ratings. Produce a table that describes how ratings are distributed by genre. We don't want just the mean, but also, min, max, median, SD and some kind of a histogram or density graph that visually shows how ratings are distributed.
 
 ```{r}
-# skimr::skim(movies) # check summary of the dataset
-# unique(movies) # check number of uniques entries
+skimr::skim(movies) # check summary of the dataset
+unique(movies) # check number of uniques entries
 ```
 
 > TEAM ANSWER TO: Are there any missing values (NAs)? Are all entries distinct or are there duplicate entries?
@@ -265,7 +266,7 @@ The correlation between a movies budget and gross revenue at the box office has 
 
 -   Examine the relationship between `gross` and `rating`. Produce a scatterplot, faceted by `genre` and discuss whether IMDB ratings are likely to be a good predictor of how much money a movie will make at the box office. Is there anything strange in this dataset?
 
-```{r, gross_on_rating}
+```{r, gross_on_rating, eval=TRUE}
 
 ggplot(movies,aes(x = rating, y = gross))+
   geom_point()+
@@ -550,52 +551,49 @@ The **'years_since_last_promotion'** variable, the 75th percentile (p75) is 3 me
 
 ```{r}
 
-
-library(scales)
 library(ggrepel)
 library(forcats)
-
-
-
-# hr_cleaned$job_satisfaction <- factor(hr_cleaned$job_satisfaction,levels=c("Low","Medium","High","Very High"))
+library(formattable)
 
 hr_cleaned %>% 
   group_by(job_satisfaction) %>% 
   summarise(count=n()) %>% 
-  mutate(percent = percent(count/sum(count)),
+  mutate(percent_t = count/sum(count),
          job_satisfaction_n = case_when(
             job_satisfaction == "Low" ~1,
             job_satisfaction == "Medium"~2,
             job_satisfaction == "High"~3,
             job_satisfaction == "Very High"~4
          )) %>% 
-  ggplot(aes(x=fct_reorder(job_satisfaction,job_satisfaction_n),y=percent))+
+  ggplot(aes(x=fct_reorder(job_satisfaction,job_satisfaction_n),y=percent_t))+
   geom_col()+
-  geom_text_repel(aes(label=percent))+
+  geom_text_repel(aes(label= sprintf("%0.2f %%", 100*percent_t)))+
+  scale_y_continuous(labels = percent)+
   labs(title="Job Satisfaction",
        x="Job Satisfaction",
        y = "% of employees")+
   theme_bw()+
   NULL
 
-# hr_cleaned$work_life_balance <- factor(hr_cleaned$work_life_balance,levels=c("Bad","Good", "Better","Best"))
+
 
 hr_cleaned %>% 
   group_by(work_life_balance) %>% 
-  summarise(count=n()) %>% 
-  mutate(percent = percent(count/sum(count)),
+  summarise(count= n()) %>% 
+  mutate(percent_t = count/sum(count),
          work_life_balance_n = case_when(
           work_life_balance == "Bad" ~1,
           work_life_balance ==  "Good" ~2,
           work_life_balance ==   "Better" ~3,
           work_life_balance ==   "Best"~4
          )) %>% 
-  ggplot(aes(x=fct_reorder(work_life_balance,work_life_balance_n),y=percent))+
+  ggplot(aes(x=fct_reorder(work_life_balance,work_life_balance_n),y=percent_t))+
   geom_col()+
-  geom_text_repel(aes(label=percent))+
+  geom_text_repel(aes(label= sprintf("%0.2f %%", 100*percent_t)))+
   labs(title="Work Life Balance",
        x="Work Life Balance",
        y = "% of employees")+
+  scale_y_continuous(labels = percent)+
   theme_bw()+
   NULL
 
@@ -662,8 +660,7 @@ hr_cleaned %>%
 ```{r}
 mean_education <- hr_cleaned %>% 
   group_by(education) %>% 
-  summarise(mean=mean(monthly_income))%>%
-  print(mean_education)
+  summarise(mean=mean(monthly_income))
 
 ggplot(mean_education,aes(x=education,y=mean))+
   geom_col()+
@@ -675,8 +672,7 @@ ggplot(mean_education,aes(x=education,y=mean))+
 
 median_education <- hr_cleaned %>% 
   group_by(education) %>% 
-  summarise(median=median(monthly_income))%>%
-  print(median_education)
+  summarise(median=median(monthly_income))
 
 ggplot(median_education,aes(x=education,y=median))+
   geom_col()+
@@ -712,7 +708,7 @@ hr_cleaned %>%
 The purpose of this exercise is to reproduce a plot using your `dplyr` and `ggplot2` skills. Read the article [The Racial Factor: There's 77 Counties Which Are Deep Blue But Also Low-Vaxx. Guess What They Have In Common?](https://acasignups.net/21/07/18/racial-factor-theres-77-counties-which-are-deep-blue-also-low-vaxx-guess-what-they-have) and have a look at the attached figure.
 
 ```{r challenge1, echo=FALSE, out.width="90%"}
-knitr::include_graphics(here::here("images", "vaxxes_by_state_red_blue_every_county_070321_1.jpeg"), error = FALSE)
+# knitr::include_graphics(here::here("images", "vaxxes_by_state_red_blue_every_county_070321_1.jpeg"), error = FALSE)
 ```
 
 You dont have to worry about the blue-red backgouns and don't worry about replicating it exactly, try and see how far you can get. You're encouraged to work together if you want to and exchange tips/tricks you figured out-- and even though the figure in the original article is from early July 2021, you can use the most recent data.
@@ -756,16 +752,9 @@ population <- vroom(population_url) %>%
 ```
 
 ```{r}
-vaccinations%>%filter(fips=="51670")
-```
-
-```{r}
-
-print(vaccinations%>%filter(fips=="05091"))
-
 vax_complete_pop_pct <- vaccinations%>%
   filter(completeness_pct>90.0)%>%
-  filter(recip_state != c("Hawaii", "Vermont", "Virginia", "West Virginia"))%>%
+  # filter(recip_state != c("Hawaii", "Vermont", "Virginia", "West Virginia"))%>%
   group_by(fips)%>%
   summarise(series_complete_pop_pct = max(series_complete_pop_pct))
   
@@ -775,10 +764,8 @@ population <- population%>%
 
 vax_complete_pop_pct <- left_join(x = vax_complete_pop_pct, 
                                   y = population, by = "fips")%>%
-  na.omit()%>%
-  
+  na.omit()
 
-print(tail(vax_complete_pop_pct))
 
 trump_votes <- election2020_results%>%
   filter(candidate == "DONALD J TRUMP")%>%
@@ -820,7 +807,7 @@ ggplot(vax_complete_pop_pct, aes(x = prcOfVote, y = series_complete_pop_pct))+
   xlab("2020 Trump vote %")+
   labs(title = "COVID-19 VACCINATION LEVELS \nOUT OF TOTAL POPULATION BY COUNTY")+
   theme_light()+
-  scale_y_continuous(expand = c(0,0), labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=20), limits = c(0,100))+
+  scale_y_continuous(expand = c(0,0), labels = function(y) paste0(y, "%"), breaks = scales::pretty_breaks(n=20), limits = c(0,100))+
   scale_x_continuous(expand = c(0,0), labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=20), limits = c(0,100))+
   theme(aspect.ratio = 20/18,
         axis.text.x = element_text(size = 5),
@@ -887,25 +874,34 @@ german_election_polls <- polls[[1]] %>% # the first table on the page contains t
 library(plotly)
 
 german_graph <- ggplot(german_election_polls, aes(x=end_date)) +
-       geom_point(aes(y = union), color = "black", size=0.5, alpha=0.3) + 
-       geom_smooth(aes(y=union), color="black", size=0.7, span=0.05, se=FALSE)+
-       geom_point(aes(y = spd), color = "darkred", size=0.5, alpha=0.3) + 
-       geom_smooth(aes(y=spd), color="darkred", size=0.7, span=0.05, se=FALSE)+
-       geom_point(aes(y = grune), color="darkgreen", size=0.5, alpha=0.3) +
-       geom_smooth(aes(y=grune), color="darkgreen", size=0.7, span=0.105, se=FALSE)+
-       geom_point(aes(y= fdp), color="yellow", size=0.5, alpha=0.3) +
-       geom_smooth(aes(y=fdp), color="yellow", size=0.7, span=0.05, se=FALSE)+
-       geom_point(aes(y= af_d), color="darkblue", size=0.5, alpha=0.3) +
-       geom_smooth(aes(y=af_d), color="darkblue",size=0.7, span=0.05, se=FALSE)+
-       geom_point(aes(y= linke), color="purple", size=0.5, alpha=0.3) +
-       geom_smooth(aes(y=linke), color="purple", size=0.7, span=0.05, se=FALSE) +
+      geom_smooth(aes(y=union), color="black", size=0.7, span=0.05, se=FALSE)+
+      geom_smooth(aes(y=spd), color="darkred", size=0.7, span=0.05, se=FALSE)+     
+      geom_smooth(aes(y=grune), color="darkgreen", size=0.7, span=0.105, se=FALSE)+
+      geom_smooth(aes(y=fdp), color="yellow", size=0.7, span=0.05, se=FALSE)+
+      geom_smooth(aes(y=af_d), color="darkblue",size=0.7, span=0.05, se=FALSE)+
+      geom_smooth(aes(y=linke), color="purple", size=0.7, span=0.05, se=FALSE) +
+      geom_point(aes(y = union), color = "black", size=0.5, alpha=0.3, show.legend = FALSE) +
+       geom_point(aes(y = spd), color = "darkred", size=0.5, alpha=0.3, show.legend = FALSE) +
+       geom_point(aes(y = grune), color="darkgreen", size=0.5, alpha=0.3, show.legend = FALSE) +
+       geom_point(aes(y= fdp), color="yellow", size=0.5, alpha=0.3, show.legend = FALSE) +
+       geom_point(aes(y= af_d), color="darkblue", size=0.5, alpha=0.3, show.legend = FALSE) +
+       geom_point(aes(y= linke), color="purple", size=0.5, alpha=0.3, show.legend = FALSE) +
        labs(
             title = "German Election Poll Tracker",
             subtitle = "who will be the next Chancellor?",
             x = "Date (last updated 3 Sep 2021)",
-            y = "Percent of Voter Population")
+            y = "Percent of Voter Population")+
+    theme_light()
 
-ggplotly(german_graph + ylim(5, 45))
+fig <- ggplotly(german_graph + ylim(5, 45))
+
+fig<- fig%>%
+  layout(hovermode = "x unified")
+
+fig <- style(fig, hoverinfo = "skip", traces = 7:13)
+
+
+fig
 
 ```
 
@@ -930,3 +926,4 @@ Check minus (1/5): Displays minimal effort. Doesn't complete all components. Cod
 Check (3/5): Solid effort. Hits all the elements. No clear mistakes. Easy to follow (both the code and the output).
 
 Check plus (5/5): Finished all components of the assignment correctly and addressed both challenges. Code is well-documented (both self-documented and with additional comments as necessary). Used tidyverse, instead of base R. Graphs and tables are properly labelled. Analysis is clear and easy to follow, either because graphs are labeled clearly or you've written additional text to describe how you interpret the output.
+
