@@ -646,15 +646,6 @@ vaccinations%>%filter(fips=="51670")
 
 ```{r}
 
-election2020_results%>%
-  filter(fips == "01001")%>%
-  summarise(totalvotes = sum(totalvotes))
-
-
-```
-
-```{r}
-
 print(vaccinations%>%filter(fips=="05091"))
 
 vax_complete_pop_pct <- vaccinations%>%
@@ -676,6 +667,7 @@ print(tail(vax_complete_pop_pct))
 
 trump_votes <- election2020_results%>%
   filter(candidate == "DONALD J TRUMP")%>%
+  filter(mode == "TOTAL")%>%
   group_by(fips)%>%
   summarise(candidatevotes = sum(candidatevotes),
             totalvotes = sum(totalvotes))%>%
@@ -690,14 +682,25 @@ vax_complete_pop_pct <- left_join(x = vax_complete_pop_pct, y = trump_votes, by=
 ```
 
 ```{r}
+library(Hmisc)
 
 ggplot(vax_complete_pop_pct, aes(x = prcOfVote, y = series_complete_pop_pct))+
-  geom_point(alpha = 0.2, color = "blue", aes(size = pop))+
+  geom_point(alpha = 0.2, color = "grey", aes(size = pop))+
+  scale_size(range = c(.1, 15), name = "Population (M)")+
   geom_point(size= 0.1)+
-  geom_smooth(method = "lm", se = FALSE, lty=2, color = "red", lwd = 0.3)+
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              lty=2, 
+              color = "blue", 
+              lwd = 0.3)+
   ylab("% of Total Population Vaccinated")+
   xlab("2020 Trump vote %")+
-  labs(title = "Covid-19 Vaccination levels out of total population by county")
+  labs(title = "Covid-19 Vaccination levels out of total population by county")+
+  theme_light()+
+  scale_y_continuous(labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=11))+
+  scale_x_continuous(labels = function(x) paste0(x, "%"), breaks = scales::pretty_breaks(n=11))+
+  theme(aspect.ratio = 20/18, panel.background = element_rect(fill = 'lightblue', aes()))
+  
   
 
 ```
