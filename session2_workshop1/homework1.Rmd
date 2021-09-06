@@ -751,10 +751,15 @@ population <- vroom(population_url) %>%
 
 ```
 
+
+> TEAM NOTE:
+
+Every datapoint that was below 90% completness was dropped to be in line with the authors process. The graph would be even closer if the seperate datasets used by the author would be downloaded as well. [Authors Description of Data Utilisation](https://acasignups.net/21/08/31/weekly-update-us-covid19-vaccination-levels-county-partisan-lean1)
+
+
 ```{r}
 vax_complete_pop_pct <- vaccinations%>%
   filter(completeness_pct>90.0)%>%
-  # filter(recip_state != c("Hawaii", "Vermont", "Virginia", "West Virginia"))%>%
   group_by(fips)%>%
   summarise(series_complete_pop_pct = max(series_complete_pop_pct))
   
@@ -911,9 +916,9 @@ There is a lot of explanatory text, comments, etc. You do not need these, so del
 
 # Details
 
--   Who did you collaborate with: TYPE NAMES HERE
--   Approximately how much time did you spend on this problem set: ANSWER HERE
--   What, if anything, gave you the most trouble: ANSWER HERE
+-   Who did you collaborate with: Members of team 11: Nisa Ozer, Lauren Wade, Nereid Kwok, Thomas Giannetti-Fakhoury, Kazmer Nagy-Betegh
+-   Approximately how much time did you spend on this problem set: 16 hours
+-   What, if anything, gave you the most trouble: manipulating the vaccine dataset, getting the hang of ggplot
 
 **Please seek out help when you need it,** and remember the [15-minute rule](https://mam2022.netlify.app/syllabus/#the-15-minute-rule){target="_blank"}. You know enough R (and have enough examples of code from class and your readings) to be able to do this. If you get stuck, ask for help from others, post a question on Slack-- and remember that I am here to help too!
 
